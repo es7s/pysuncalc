@@ -1,0 +1,130 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pysuncalc"
+dynamic = ["version"]
+description = "Library for sun timings calculations. Python port of JS library SunCalc"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.8"
+platforms = ["linux"]
+keywords = [
+    "sun", "calculator", "astronomy", "sunrise", "sunset", "zenith",
+]
+authors = [
+    { name = "Aleksandr Shavykin", email = "0.delameter@gmail.com" },
+]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Development Status :: 5 - Production/Stable",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Topic :: Software Development :: Libraries",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/es7s/pysuncalc"
+
+# ---------------------------------------------------------
+# build
+
+[tool.hatch.publish.index]
+disable = false
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/pysuncalc",
+    "/tests",
+]
+
+[tool.hatch.version]
+path = "pysuncalc/_version.py"
+
+# ---------------------------------------------------------
+# envs.build
+
+[tool.hatch.envs.build]
+detached = true
+extra-dependencies = [
+    "build~=0.8",
+    "setuptools~=65.3",
+    "twine~=4.0",
+]
+
+# envs.test
+
+[tool.hatch.envs.test]
+extra-dependencies = [
+    "coverage[toml]~=6.4",
+    "pytest~=7.1",
+    "pytest-cov~=4.1",
+    "sybil~=3.0",
+]
+
+[tool.hatch.envs.test.scripts]
+test = "pytest"
+cover = [
+    "coverage run -m pytest",
+    "coverage html",
+    "coverage report",
+]
+
+# ---------------------------------------------------------
+# lint
+
+[tool.black]
+line-length = 100
+target-version = ['py310']
+
+# ---------------------------------------------------------
+# test
+
+[tool.pytest.ini_options]
+testpaths = [
+    "pysuncalc",
+    "tests",
+]
+addopts = [
+    "-p", "no:doctest",
+    "-W", "ignore:SimpleTable:DeprecationWarning",
+    "--strict-config",
+    "--maxfail", "1",
+    "--durations", "5",
+    "--tb=short",
+]
+xfail_strict = true
+
+# ---------------------------------------------------------
+# cover
+
+[tool.coverage.run]
+source = ["pysuncalc"]
+branch = true
+omit = [
+    "*/__init__.py",
+]
+dynamic_context = "test_function"
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+]
+ignore_errors = true
+
+[tool.coverage.html]
+directory = "coverage"
+title = "pysuncalc coverage"
