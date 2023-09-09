@@ -27,7 +27,7 @@ Morbi semper metus at egestas vulputate:
 
 ## Installation
 
-    pipx install pysuncalc
+    pip install pysuncalc
 
 Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. 
 
@@ -37,8 +37,6 @@ Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit la
 
 ## Usage
 
-    make init
-
 At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. 
 
 Et harum quidem rerum facilis est et expedita distinctio.
@@ -47,8 +45,4 @@ Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo
 
 _Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat._
 
-## Changelog
-
-### v0.0.0
-
-- yes
+## [Changelog](CHANGES.rst)
