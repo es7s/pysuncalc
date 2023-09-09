@@ -2,7 +2,7 @@
   <img src="https://user-images.githubusercontent.com/50381946/167810957-14b78013-00cf-436e-b535-d2b89f881c44.png">
   <br>
   <code>
-    *PROJECT_NAME
+    pysuncalc
   </code>
   <br>
 </h1>
@@ -27,7 +27,7 @@ Morbi semper metus at egestas vulputate:
 
 ## Installation
 
-    pipx install *PROJECT_NAME
+    pipx install pysuncalc
 
 Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. 
 

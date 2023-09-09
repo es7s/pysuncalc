@@ -10,8 +10,8 @@ max_line_length = 120
 tab_width = 4
 
 [*.py]
-max_line_length = 88
-ij_visual_guides = 79,120
+max_line_length = 100
+ij_visual_guides = 88,100
 
 [*.rst]
 indent_size = 3

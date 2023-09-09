@@ -1,23 +1,14 @@
-## *PROJECT_NAME             ## *PROJECT_DESCRIPTION
-## (C) *CYR                  ## A. Shavykin <0.delameter@gmail.com>
+## es7s/pysuncalc            ## Library for sun timings calculations
+## (C) 2023                  ## A. Shavykin <0.delameter@gmail.com>
 ##---------------------------##-------------------------------------------------------------
 .ONESHELL:
 .PHONY: help test docs
 
-PROJECT_NAME = *PROJECT_NAME
-PROJECT_NAME_PUBLIC = ${PROJECT_NAME}
-PROJECT_NAME_PRIVATE = ${PROJECT_NAME}-test
-
-HOST_DEFAULT_PYTHON ?= /usr/bin/python
-VENV_PATH = venv
-VENV_TMP_PATH = /tmp/venv
+PROJECT_NAME = pysuncalc
 
 DOTENV = .env
 DOTENV_DIST = .env.dist
 OUT_BUILD_RELEASE_PATH = dist
-OUT_BUILD_DEV_PATH = dist-dev
-OUT_DEPS_PATH = misc/depends
-OUT_COVER_PATH = misc/coverage
 
 include ${DOTENV_DIST}
 -include ${DOTENV}
@@ -28,7 +19,6 @@ NOW    := $(shell date '+%Y-%b-%0e.%H%M%S.%3N')
 BOLD   := $(shell tput -Txterm bold)
 GREEN  := $(shell tput -Txterm setaf 2)
 YELLOW := $(shell tput -Txterm setaf 3)
-BLUE   := $(shell tput -Txterm setaf 4)
 DIM    := $(shell tput -Txterm dim)
 RESET  := $(shell printf '\e[m')
                                 # tput -Txterm sgr0 returns SGR-0 with
@@ -38,48 +28,11 @@ RESET  := $(shell printf '\e[m')
 help:   ## Show this help
 	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v @fgrep | sed -Ee 's/^(##)\s?(\s*#?[^#]+)#*\s*(.*)/\1${YELLOW}\2${RESET}#\3/; s/(.+):(#|\s)+(.+)/##   ${GREEN}\1${RESET}#\3/; s/\*(\w+)\*/${BOLD}\1${RESET}/g; 2~1s/<([*<@>.A-Za-z0-9_-]+)>/${DIM}\1${RESET}/gi' -e 's/(\x1b\[)33m#/\136m/' | column -ts# | sed -Ee 's/ {3}>/ >/'
 
-environment:  ## Show environment vars used by this Makefile
-	@echo HOST_DEFAULT_PYTHON=${HOST_DEFAULT_PYTHON}
-	echo OUT_BUILD_DEV_PATH=${PWD}/${OUT_BUILD_DEV_PATH}
-	echo OUT_BUILD_RELEASE_PATH=${PWD}/${OUT_BUILD_RELEASE_PATH}
-	echo OUT_COVER_PATH=${PWD}/${OUT_COVER_PATH}
-	echo OUT_DEPS_PATH=${PWD}/${OUT_DEPS_PATH}
-	echo PIPX_DEFAULT_PYTHON=${PIPX_DEFAULT_PYTHON}
-	echo VENV_PATH=${PWD}/${VENV_PATH}
-
-init:  ## Replace placeholders throughout the skeleton
-	./init.sh
-
-reinit-venv:  ## > Prepare environment for module building  <venv>
-	rm -vrf ${VENV_PATH}
-	if [ ! -f .env.build ] ; then cp -u ${DOTENV_DIST} ${DOTENV} && sed -i -Ee '/^VERSION=/d' ${DOTENV} ; fi
-	${HOST_DEFAULT_PYTHON} -m venv ${VENV_PATH}
-	${HOST_DEFAULT_PYTHON} -m pip install pipx
-	${VENV_PATH}/bin/pip install -r requirements.txt -r requirements-dev.txt
-
-all:   ## Prepare, run tests, generate docs and reports, build module
-all: reinit-build test coverage build
-
-
 ##
 ## Pre-build
 
-freeze:  ## Actualize the requirements.txt file(s)
-	mkdir -p ${VENV_TMP_PATH}
-	${HOST_DEFAULT_PYTHON} -m venv ${VENV_TMP_PATH}
-	${VENV_TMP_PATH}/bin/pip install -r requirements.txt
-	${VENV_TMP_PATH}/bin/pip freeze -r requirements.txt --all > requirements.txt.tmp
-	sed -i -Ee '/were added by pip/ s/.+//' requirements.txt.tmp
-	mv requirements.txt.tmp requirements.txt
-	rm -vrf ${VENV_TMP_PATH}
-
-freeze-dev:  ## Actualize the requirements-dev.txt file(s)  <venv>
-	${VENV_PATH}/bin/pip freeze -r requirements-dev.txt --all --exclude-editable > requirements-dev.txt.tmp
-	sed -i -Ee '/were added by pip/ s/.+//' requirements-dev.txt.tmp
-	mv requirements-dev.txt.tmp requirements-dev.txt
-
 demolish-build:  ## Delete build output folders
-	rm -f -v ${OUT_BUILD_RELEASE_PATH}/* ${PROJECT_NAME_PUBLIC}.egg-info/* ${PROJECT_NAME_PRIVATE}.egg-info/*
+	rm -f -v ${OUT_BUILD_RELEASE_PATH}/*
 
 show-version: ## Show current package version
 	@echo "Current version: ${YELLOW}${VERSION}${RESET}"
@@ -88,15 +41,9 @@ set-version: ## Set new package version
 set-version: show-version
 	@read -p "New version (press enter to keep current): " VERSION
 	if [ -z $$VERSION ] ; then echo "No changes" && return 0 ; fi
-	sed -E -i "s/^VERSION.+/VERSION=$$VERSION/" ${DOTENV_DIST}
-	sed -E -i "s/^version.+/version = $$VERSION/" setup.cfg
+	sed -E -i "s/^VERSION.+/VERSION=$$VERSION/" ${DOTENV_DIST} ${DOTENV}
 	sed -E -i "s/^__version__.+/__version__ = \"$$VERSION\"/" ${PROJECT_NAME}/_version.py
 	echo "Updated version: ${GREEN}$$VERSION${RESET}"
-
-depends:  ## Build and display module dependency graph
-	rm -vrf ${OUT_DEPS_PATH}
-	mkdir -p ${OUT_DEPS_PATH}
-	./pydeps.sh ${VENV_PATH}/bin/pydeps ${PROJECT_NAME} ${OUT_DEPS_PATH}
 
 purge-cache:  ## Clean up pycache
 	find . -type d \( -name __pycache__ -or -name .pytest_cache \) -print -exec rm -rf {} +
@@ -105,66 +52,21 @@ purge-cache:  ## Clean up pycache
 ## Testing
 
 test: ## Run pytest
-	${VENV_PATH}/bin/pytest tests
+	hatch run test:test
 
-test-verbose: ## Run pytest with detailed output
-	${VENV_PATH}/bin/pytest tests -v
-
-test-debug: ## Run pytest with VERY detailed output
-	${VENV_PATH}/bin/pytest tests -v --log-file-level=DEBUG --log-file=logs/testrun.${NOW}.log
-	if command -v bat &>/dev/null ; then bat logs/testrun.${NOW}.log -n --wrap=never ; else less logs/testrun.${NOW}.log ; fi
-
-coverage: ## Run coverage and make a report
-	rm -vrf ${OUT_COVER_PATH}
-	${VENV_PATH}/bin/python -m coverage run tests -vv
-	${VENV_PATH}/bin/coverage report
-	${VENV_PATH}/bin/coverage html
-	if [ -n $$DISPLAY ] ; then xdg-open ${OUT_COVER_PATH}/index.html ; fi
+cover: ## Run coverage and make a report
+	hatch run test:cover
 
 ##
 ## Building / Packaging
-###  local
-
-reinstall-local:  ## > (Re)install as editable, inject latest deps  <pipx>
-	@pipx uninstall ${PROJECT_NAME}
-	pipx install ${PROJECT_NAME} --pip-args="-e ."
-
-###  dev
-
-build-dev: ## Create new private build  <*-test>
-build-dev: demolish-build
-	sed -E -i "s/^name.+/name = ${PROJECT_NAME_PRIVATE}/" setup.cfg
-	${VENV_PATH}/bin/python -m build --outdir ${OUT_BUILD_DEV_PATH}
-	sed -E -i "s/^name.+/name = ${PROJECT_NAME_PUBLIC}/" setup.cfg
-
-upload-dev: ## Upload last private build (=> dev registry)
-	${VENV_PATH}/bin/twine \
-	    upload \
-	    --repository testpypi \
-	    -u ${PYPI_USERNAME} \
-	    -p ${PYPI_PASSWORD_DEV} \
-	    --verbose \
-	    ${OUT_BUILD_DEV_PATH}/*
-
-install-dev: ## Install latest private build from dev registry
-	pipx uninstall ${PROJECT_NAME_PRIVATE}
-	pipx install ${PROJECT_NAME_PRIVATE}==${VERSION} --pip-args="-i https://test.pypi.org/simple/"
-
-### release
 
 build: ## Create new *public* build
 build: demolish-build
-	${VENV_PATH}/bin/python -m build
+	hatch --verbose -e build build
 
-upload: ## Upload last *public* build (=> PRIMARY registry)
-	${VENV_PATH}/bin/twine \
-	    upload \
-	    -u ${PYPI_USERNAME} \
-	    -p ${PYPI_PASSWORD} \
-	    --verbose \
-	    ${OUT_BUILD_RELEASE_PATH}/*
-
-install: ## > Install latest *public* build from PRIMARY registry
-	pipx install ${PROJECT_NAME_PUBLIC}
+publish: ## Upload last *public* build (=> PRIMARY registry)
+	hatch --verbose -e build publish \
+		-u ${HATCH_INDEX_USER} \
+		-a ${HATCH_INDEX_AUTH}
 
 ##

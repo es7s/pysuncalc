@@ -2,13 +2,13 @@
 
 .. default-role:: any
 
-.. title:: *PROJECT_NAME
+.. title:: pysuncalc
 
 =====================
-*PROJECT_NAME
+pysuncalc
 =====================
 
-*PROJECT_DESCRIPTION
+Python port of JS library SunCalc
 
 .. toctree::
    :maxdepth: 3
