@@ -1,2 +1,0 @@
-setuptools~=62.3.2
-# click~=8.1
