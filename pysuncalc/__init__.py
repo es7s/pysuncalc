@@ -14,7 +14,7 @@ Based on math from http://aa.quae.nl/en/reken/zonpositie.html
 import math
 from collections.abc import Iterable
 from dataclasses import dataclass
-from datetime import datetime, date, timezone
+from datetime import datetime, date, timezone, tzinfo
 
 RAD: float = math.pi / 180
 DAY_SEC: int = 60 * 60 * 24
@@ -77,7 +77,7 @@ def get_position(dt: datetime, lat: float, long: float) -> tuple[float, float]:
 
 
 def get_times(
-    dt: date|datetime,
+    dt: date | datetime,
     lat: float,
     long: float,
     names: Iterable[str] = None,
@@ -86,13 +86,15 @@ def get_times(
     calculate sun times at specified date and coordinates
 
     >>> t = datetime.fromisoformat('2023-09-08T19:37:41+01:00')
+    >>> t
+    datetime.datetime(2023, 9, 8, 19, 37, 41, tzinfo=datetime.timezone(datetime.timedelta(seconds=3600)))
     >>> get_times(t, 55.755833, 37.617222).get(DAWN)
-    datetime.datetime(2023, 9, 8, 5, 9, 55, 387933)
+    datetime.datetime(2023, 9, 8, 2, 9, 55, 387933, tzinfo=datetime.timezone.utc)
 
     :return: {<name>: <datetime>, ...}
     """
     if isinstance(dt, date):
-        dt = datetime(dt.year, dt.month, dt.day, hour=12)
+        dt = datetime(dt.year, dt.month, dt.day, hour=12, tzinfo=timezone.utc)
 
     lw: float = RAD * -long
     phi: float = RAD * lat
@@ -109,8 +111,8 @@ def get_times(
     j_noon: float = _solar_transit_j(ds, M, L)
 
     result: dict[str, datetime] = {
-        ZENITH: _from_julian(j_noon),
-        NADIR: _from_julian(j_noon - 0.5),
+        ZENITH: _from_julian(dt.tzinfo, j_noon),
+        NADIR: _from_julian(dt.tzinfo, j_noon - 0.5),
     }
     for time in _SUN_TIMES:
         h0: float = (time.angle + dh) * RAD
@@ -119,8 +121,8 @@ def get_times(
             continue
         j_rise: float = j_noon - (j_set - j_noon)
 
-        result[time.rise_name] = _from_julian(j_rise)
-        result[time.set_name] = _from_julian(j_set)
+        result[time.rise_name] = _from_julian(dt.tzinfo, j_rise)
+        result[time.set_name] = _from_julian(dt.tzinfo, j_set)
 
     # not part of the original library:
     if SUNRISE not in result.keys():
@@ -144,8 +146,8 @@ def _to_julian(dt: datetime) -> float:
     return (dt.timestamp() / DAY_SEC) - 0.5 + J1970
 
 
-def _from_julian(j: float) -> datetime:
-    return datetime.fromtimestamp((j + 0.5 - J1970) * DAY_SEC)
+def _from_julian(tz: tzinfo, j: float) -> datetime:
+    return datetime.fromtimestamp((j + 0.5 - J1970) * DAY_SEC, tz)
 
 
 def _right_ascension(l: float, b: float) -> float:
