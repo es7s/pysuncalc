@@ -13,14 +13,14 @@ from pysuncalc import get_times, get_position, SUNRISE, SUNSET, ZENITH, NADIR, _
 from . import assert_close
 
 ts2dtu = lambda *args: datetime(*args, tzinfo=timezone(timedelta(hours=0)))
-str2dt = lambda dstr: datetime.strptime(dstr, "%d-%b-%y %H:%M:%S")
+str2dt = lambda dstr: datetime.strptime(dstr, "%d-%b-%y %H:%M:%ST%z")
 
 
 class Test:
     @pytest.mark.parametrize(
         "dt, lat, long, expected",
         [
-            (str2dt("10-Sep-23 18:27:32"), 55.7558, 37.6172, (1.62185, 0.07142)),
+            (str2dt("10-Sep-23 18:27:32T+03:00"), 55.7558, 37.6172, (1.62185, 0.07142)),
             # (ts2dtl(2023, 9, 10, 18, 24, 11), 55.7558, 37.6172, (2.34878, -0.33646)),
             # (ts2dtl(1694198261), 0.0, 0.0, (1.67233, -0.17137)),
             # (ts2dtl(1694198261), 0.0, -90.0, (2.10061, 1.37185)),
