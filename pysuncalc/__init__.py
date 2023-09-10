@@ -70,6 +70,7 @@ def get_position(dt: datetime, lat: float, long: float) -> tuple[float, float]:
     lw: float = RAD * -long
     phi: float = RAD * lat
     d: float = _to_days(dt)
+    print(d)
 
     dec, ra = _sun_coords(d)
     H = _sidereal_time(d, lw) - ra

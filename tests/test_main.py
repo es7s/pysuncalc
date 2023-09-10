@@ -4,7 +4,7 @@
 #  Licensed under MIT License
 # ==============================================================================
 from collections.abc import Iterable
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 
 import pytest
 
@@ -35,7 +35,8 @@ class Test:
     def test_get_position(
         self, dt: datetime, lat: float, long: float, expected: tuple[float, float]
     ):
-        print(dt.astimezone())
+        print(dt)
+        print(dt.astimezone(timezone.utc))
         assert_close(expected, get_position(dt, lat, long))
 
     @pytest.mark.parametrize(
