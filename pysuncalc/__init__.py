@@ -98,7 +98,6 @@ def get_times(
 
     dh: float = _observer_angle(0)
     d: float = _to_days(dt)
-    print(d)
     n: int = _julian_cycle(d, lw)
     ds: float = _approx_transit(0, lw, n)
 

@@ -5,14 +5,14 @@
 # ==============================================================================
 from collections.abc import Iterable
 from datetime import datetime, timezone, timedelta
+from functools import partial
 
 import pytest
 
 from pysuncalc import get_times, get_position, SUNRISE, SUNSET, ZENITH, NADIR, _SUN_TIMES
 from . import assert_close
 
-ts2dt = datetime.fromtimestamp
-uts2dt = datetime.utcfromtimestamp
+ts2dt = partial(datetime.fromtimestamp, tz=timezone(timedelta(hours=3)))
 
 
 class Test:
@@ -39,13 +39,13 @@ class Test:
         assert_close(expected, get_position(dt, lat, long))
 
     @pytest.mark.parametrize(
-        "dt, lat, long, expected",
+        "dt, lat, long, expected, extra_names",
         [
-            (ts2dt(1694202441), 55.7558, 37.6172, {SUNRISE: ts2dt(1694130486)}),
-            (ts2dt(1694202441), 55.7558, 37.6172, {SUNSET: ts2dt(1694178584)}),
-            (ts2dt(1554757485), 56.07, 47.14, {ZENITH: ts2dt(1554789255)}),
-            (ts2dt(1672520400), -90.0, 0.0, {ZENITH: ts2dt(1672477442)}),
-            (ts2dt(1672520400), 90.0, 0.0, {NADIR: ts2dt(1672434242)}),
+            (ts2dt(1694202441), 55.7558, 37.6172, {SUNRISE: ts2dt(1694130486)}, []),
+            (ts2dt(1694202441), 55.7558, 37.6172, {SUNSET: ts2dt(1694178584)}, []),
+            (ts2dt(1554757485), 56.07, 47.14, {ZENITH: ts2dt(1554789255)}, []),
+            (ts2dt(1672520400), -90.0, 0.0, {}, [NADIR]),
+            (ts2dt(1672520400), 90.0, 0.0, {}, [ZENITH]),
         ],
     )
     def test_get_times(
@@ -54,10 +54,9 @@ class Test:
         lat: float,
         long: float,
         expected: dict[str, datetime],
+        extra_names: list[str],
     ):
-        print(dt)
-        print(dt.astimezone(timezone.utc))
-        assert_close(expected, get_times(dt, lat, long, expected.keys()))
+        assert_close(expected, get_times(dt, lat, long, [*expected.keys()] + (extra_names or [])))
 
     def test_get_times_keys(self):
         def _expected() -> Iterable[str]:
