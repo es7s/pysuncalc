@@ -4,15 +4,14 @@
 #  Licensed under MIT License
 # ==============================================================================
 from collections.abc import Iterable
-from datetime import datetime, timezone, timedelta
-from functools import partial
+from datetime import datetime
 
 import pytest
 
 from pysuncalc import get_times, get_position, SUNRISE, SUNSET, ZENITH, NADIR, _SUN_TIMES
 from . import assert_close
 
-ts2dt = partial(datetime.fromtimestamp, tz=timezone(timedelta(seconds=10800)))
+ts2dt = datetime.fromtimestamp
 
 
 class Test:
@@ -41,11 +40,11 @@ class Test:
     @pytest.mark.parametrize(
         "date, lat, long, expected",
         [
-            (ts2dt(1694202441), 55.7558, 37.6172, {SUNRISE: ts2dt(1694141286)}),
-            (ts2dt(1694202441), 55.7558, 37.6172, {SUNSET: ts2dt(1694189383)}),
-            (ts2dt(1554757485), 56.07, 47.14, {ZENITH: ts2dt(1554800055)}),
-            (ts2dt(1672520400), -90.0, 0.0, {ZENITH: ts2dt(1672488242)}),
-            (ts2dt(1672520400), 90.0, 0.0, {NADIR: ts2dt(1672445042)}),
+            (ts2dt(1694202441), 55.7558, 37.6172, {SUNRISE: ts2dt(1694130486)}),
+            (ts2dt(1694202441), 55.7558, 37.6172, {SUNSET: ts2dt(1694178584)}),
+            (ts2dt(1554757485), 56.07, 47.14, {ZENITH: ts2dt(1554789255)}),
+            (ts2dt(1672520400), -90.0, 0.0, {ZENITH: ts2dt(1672477442)}),
+            (ts2dt(1672520400), 90.0, 0.0, {NADIR: ts2dt(1672434242)}),
         ],
     )
     def test_get_times(
