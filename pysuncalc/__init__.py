@@ -86,7 +86,7 @@ def get_times(
     calculate sun times at specified date and coordinates
 
     >>> get_times(datetime(2023, 9, 7, 12), 55.755833, 37.617222).get(DAWN)
-    datetime.datetime(2023, 9, 7, 2, 7, 52, 322296)
+    datetime.datetime(2023, 9, 7, 5, 7, 52, 322296)
 
     :return: {<name>: <datetime>, ...}
     """
@@ -144,7 +144,7 @@ def _to_julian(dt: datetime) -> float:
 
 
 def _from_julian(j: float) -> datetime:
-    return datetime.utcfromtimestamp((j + 0.5 - J1970) * DAY_SEC)
+    return datetime.fromtimestamp((j + 0.5 - J1970) * DAY_SEC)
 
 
 def _right_ascension(l: float, b: float) -> float:
