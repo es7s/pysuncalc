@@ -85,9 +85,9 @@ def get_times(
     """
     calculate sun times at specified date and coordinates
 
-    >>> t = datetime(2023, 9, 7, 12, tzinfo=timezone.utc)
+    >>> t = datetime.fromisoformat('2023-09-08T19:37:41+01:00')
     >>> get_times(t, 55.755833, 37.617222).get(DAWN)
-    datetime.datetime(2023, 9, 7, 5, 7, 52, 322296)
+    datetime.datetime(2023, 9, 8, 5, 9, 55, 387933)
 
     :return: {<name>: <datetime>, ...}
     """
