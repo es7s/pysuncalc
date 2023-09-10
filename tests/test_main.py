@@ -4,14 +4,15 @@
 #  Licensed under MIT License
 # ==============================================================================
 from collections.abc import Iterable
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
+from functools import partial
 
 import pytest
 
 from pysuncalc import get_times, get_position, SUNRISE, SUNSET, ZENITH, NADIR, _SUN_TIMES
 from . import assert_close
 
-ts2dt = datetime.fromtimestamp
+ts2dt = partial(datetime.fromtimestamp, tz=timezone(timedelta(seconds=10800)))
 
 
 class Test:

@@ -15,7 +15,6 @@ include ${DOTENV_DIST}
 export
 VERSION ?= 0.0.0
 
-NOW    := $(shell date '+%Y-%b-%0e.%H%M%S.%3N')
 BOLD   := $(shell tput -Txterm bold)
 GREEN  := $(shell tput -Txterm setaf 2)
 YELLOW := $(shell tput -Txterm setaf 3)
@@ -59,6 +58,19 @@ cover: ## Run coverage and make a report
 
 ##
 ## Building / Packaging
+
+_freeze = (	echo "${BSEP}\e[34mFreezing \e[1;94m$1\e[22;34m:\e[m\n${BSEP}"; \
+			hatch -e $1 run pip freeze -q --exclude-editable | \
+				sed --unbuffered -E -e '/^(Checking|Syncing|Creating|Installing)/d' | \
+				fgrep -e pysuncalc -v | \
+				tee requirements-$1.txt | \
+				sed --unbuffered -E -e 's/^([a-zA-Z0-9_-]+)/\x1b[32m\1\x1b[m/' \
+									-e 's/([0-9.]+|@[a-zA-Z0-9_-]+)$$/\x1b[33m\1\x1b[m/'; \
+			echo)
+
+freeze:  ## Make requirements-*.txt for hatch=less environments
+	@$(call _freeze,test)
+	@$(call _freeze,build)
 
 build: ## Create new *public* build
 build: demolish-build

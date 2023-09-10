@@ -1,11 +1,16 @@
-<h1 align="center">
-  <img src="https://user-images.githubusercontent.com/50381946/167810957-14b78013-00cf-436e-b535-d2b89f881c44.png">
-  <br>
-  <code>
-    pysuncalc
-  </code>
-  <br>
-</h1>
+<div align="center">
+   <img src="logo.png" width="96" height="96" alt="Logo"><br>
+   <img src="label.png" width="300" height="64" alt="pysuncalc">
+</div>
+
+<div align="center">
+  <img src="https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10-3776AB?logo=python&logoColor=white&labelColor=333333" alt="Python 3.8 | 3.9 | 3.10">
+  <a href="https://pepy.tech/project/pysuncalc/"><img alt="Downloads" src="https://static.pepy.tech/badge/pysuncalc"></a>
+  <a href="https://pypi.org/project/pysuncalc/"><img alt="PyPI" src="https://img.shields.io/pypi/v/pysuncalc"></a>
+  <a href='https://coveralls.io/github/es7s/pysuncalc?branch=master'><img src='https://coveralls.io/repos/github/es7s/pysuncalc/badge.svg?branch=master' alt='Coverage Status' /></a>
+  <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
+</div>
+<h1> </h1>
 
 Proin lacinia metus auctor est posuere, in ornare dui hendrerit. Aliquam eget est gravida, iaculis tortor a, aliquam ligula.
 
@@ -45,4 +50,6 @@ Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo
 
 _Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat._
 
-## [Changelog](CHANGES.rst)
+## Changelog
+
+#### [CHANGES.rst](CHANGES.rst)
