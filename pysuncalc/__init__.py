@@ -14,7 +14,7 @@ Based on math from http://aa.quae.nl/en/reken/zonpositie.html
 import math
 from collections.abc import Iterable
 from dataclasses import dataclass
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 
 RAD: float = math.pi / 180
 DAY_SEC: int = 60 * 60 * 24
@@ -85,7 +85,8 @@ def get_times(
     """
     calculate sun times at specified date and coordinates
 
-    >>> get_times(datetime(2023, 9, 7, 12), 55.755833, 37.617222).get(DAWN)
+    >>> t = datetime(2023, 9, 7, 12, tzinfo=timezone.utc)
+    >>> get_times(t, 55.755833, 37.617222).get(DAWN)
     datetime.datetime(2023, 9, 7, 5, 7, 52, 322296)
 
     :return: {<name>: <datetime>, ...}
