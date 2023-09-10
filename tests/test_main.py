@@ -16,7 +16,7 @@ ts2dt = datetime.utcfromtimestamp
 
 class Test:
     @pytest.mark.parametrize(
-        "date, lat, long, expected",
+        "dt, lat, long, expected",
         [
             (ts2dt(1694198261), 55.7558, 37.6172, (1.66327, 0.05909)),
             (ts2dt(1694198261), 0.0, 0.0, (1.69393, 0.60976)),
@@ -33,12 +33,13 @@ class Test:
         ],
     )
     def test_get_position(
-        self, date: datetime, lat: float, long: float, expected: tuple[float, float]
+        self, dt: datetime, lat: float, long: float, expected: tuple[float, float]
     ):
-        assert_close(expected, get_position(date, lat, long))
+        print(dt.astimezone())
+        assert_close(expected, get_position(dt, lat, long))
 
     @pytest.mark.parametrize(
-        "date, lat, long, expected",
+        "dt, lat, long, expected",
         [
             (ts2dt(1694202441), 55.7558, 37.6172, {SUNRISE: ts2dt(1694130486)}),
             (ts2dt(1694202441), 55.7558, 37.6172, {SUNSET: ts2dt(1694178584)}),
@@ -49,12 +50,12 @@ class Test:
     )
     def test_get_times(
         self,
-        date: datetime,
+        dt: datetime,
         lat: float,
         long: float,
         expected: dict[str, datetime],
     ):
-        assert_close(expected, get_times(date, lat, long, expected.keys()))
+        assert_close(expected, get_times(dt, lat, long, expected.keys()))
 
     def test_get_times_keys(self):
         def _expected() -> Iterable[str]:
