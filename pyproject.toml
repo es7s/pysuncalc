@@ -97,7 +97,7 @@ addopts = [
     "-p", "no:doctest",
     "-W", "ignore:SimpleTable:DeprecationWarning",
     "--strict-config",
-    "--maxfail", "1",
+    "--maxfail", "100",
     "--durations", "5",
     "--tb=short",
 ]
