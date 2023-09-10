@@ -14,7 +14,7 @@ Based on math from http://aa.quae.nl/en/reken/zonpositie.html
 import math
 from collections.abc import Iterable
 from dataclasses import dataclass
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, date
 
 RAD: float = math.pi / 180
 DAY_SEC: int = 60 * 60 * 24
@@ -62,14 +62,14 @@ _SUN_TIMES = [
 """ sun times configuration """
 
 
-def get_position(date: datetime, lat: float, long: float) -> tuple[float, float]:
+def get_position(dt: datetime, lat: float, long: float) -> tuple[float, float]:
     """
     calculate sun position at specified datetime and coordinates
     :return: (azimuth, altitude)
     """
     lw: float = RAD * -long
     phi: float = RAD * lat
-    d: float = _to_days(date)
+    d: float = _to_days(dt)
 
     dec, ra = _sun_coords(d)
     H = _sidereal_time(d, lw) - ra
@@ -77,25 +77,27 @@ def get_position(date: datetime, lat: float, long: float) -> tuple[float, float]
 
 
 def get_times(
-    date: datetime,
+    dt: date|datetime,
     lat: float,
     long: float,
     names: Iterable[str] = None,
 ) -> dict[str, datetime]:
     """
-    calculate sun times at specified datetime and coordinates
+    calculate sun times at specified date and coordinates
 
-    >>> times = get_times(datetime(2023, 9, 7, 12, 0), 55.755833, 37.617222, [DAWN])
-    >>> times.get(DAWN)
+    >>> get_times(datetime(2023, 9, 7, 12), 55.755833, 37.617222).get(DAWN)
     datetime.datetime(2023, 9, 7, 2, 7, 52, 322296)
 
     :return: {<name>: <datetime>, ...}
     """
+    if isinstance(dt, date):
+        dt = datetime(dt.year, dt.month, dt.day, hour=12)
+
     lw: float = RAD * -long
     phi: float = RAD * lat
 
     dh: float = _observer_angle(0)
-    d: float = _to_days(date)
+    d: float = _to_days(dt)
     n: int = _julian_cycle(d, lw)
     ds: float = _approx_transit(0, lw, n)
 
@@ -133,12 +135,12 @@ def get_times(
     return result
 
 
-def _to_days(date: datetime) -> float:
-    return _to_julian(date) - J2000
+def _to_days(dt: datetime) -> float:
+    return _to_julian(dt) - J2000
 
 
-def _to_julian(date: datetime) -> float:
-    return (date.timestamp() / DAY_SEC) - 0.5 + J1970
+def _to_julian(dt: datetime) -> float:
+    return (dt.timestamp() / DAY_SEC) - 0.5 + J1970
 
 
 def _from_julian(j: float) -> datetime:
