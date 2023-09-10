@@ -1,0 +1,29 @@
+name: publish
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  test-default:
+    uses: delameter/ci-cd/.github/workflows/test-hatch.yml@v4
+    with:
+      python-version: ${{ vars.PYTHON_VERSION }}
+
+  coveralls:
+    needs: [test-default]
+    uses: delameter/ci-cd/.github/workflows/coveralls-hatch.yml@v4
+    with:
+      python-version: ${{ vars.PYTHON_VERSION }}
+    secrets:
+      coveralls-repo-token: ${{ secrets.COVERALLS_REPO_TOKEN }}
+
+  publish-main:
+    needs: [test-default]
+    uses: delameter/ci-cd/.github/workflows/publish-hatch.yml@v4
+    with:
+      python-version: ${{ vars.PYTHON_VERSION }}
+      hatch-index-repo: "main"
+    secrets:
+      hatch-index-auth: ${{ secrets.PYPI_PASSWORD }}

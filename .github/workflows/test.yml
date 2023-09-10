@@ -1,0 +1,34 @@
+name: test
+
+on:
+  push:
+    branches:
+      - dev
+  pull_request:
+    branches:
+      - master
+
+concurrency:
+  # head_ref is defined for pr-runs only; cancel previous pr-runs on conflict, keep push-runs:
+  group: ${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  test-all:
+    uses: delameter/ci-cd/.github/workflows/test-hatch.yml@v4
+    with:
+      python-version: ${{ matrix.python-version }}
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [ "3.8", "3.9", "3.10" ]
+
+  publish-test:  # on pushes to dev
+    needs: [test-all]
+    if: ${{ github.ref == 'refs/heads/dev' }}
+    uses: delameter/ci-cd/.github/workflows/publish-hatch.yml@v4
+    with:
+      python-version: ${{ vars.PYTHON_VERSION }}
+      hatch-index-repo: "test"
+    secrets:
+      hatch-index-auth: ${{ secrets.PYPI_PASSWORD_TEST }}
