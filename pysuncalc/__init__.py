@@ -14,7 +14,7 @@ Based on math from http://aa.quae.nl/en/reken/zonpositie.html
 import math
 from collections.abc import Iterable
 from dataclasses import dataclass
-from datetime import datetime, date, timezone, tzinfo
+from datetime import datetime, date, tzinfo, timezone
 
 RAD: float = math.pi / 180
 DAY_SEC: int = 60 * 60 * 24
@@ -67,9 +67,13 @@ def get_position(dt: datetime, lat: float, long: float) -> tuple[float, float]:
     calculate sun position at specified datetime and coordinates
     :return: (azimuth, altitude)
     """
+    if not isinstance(dt, datetime):
+        raise TypeError(dt)
+    ts = dt.timestamp()
+
     lw: float = RAD * -long
     phi: float = RAD * lat
-    d: float = _to_days(dt)
+    d: float = _to_days(ts)
 
     dec, ra = _sun_coords(d)
     H = _sidereal_time(d, lw) - ra
@@ -85,23 +89,35 @@ def get_times(
     """
     calculate sun times at specified date and coordinates
 
-    >>> t = datetime.fromisoformat('2023-09-08T19:37:41+01:00')
-    >>> get_times(t, 55.755833, 37.617222).get(SUNSET).isoformat()
+    >>> t = datetime.fromisoformat('2023-09-11T19:37:41+01:00')
+    >>> get_times(t, 55.755833, 37.617222).get(SUNSET)
     '2023-09-08T17:09:43.632146+01:00'
 
-    >>> t = datetime.fromisoformat('2023-09-08T19:37:41')
+    >>> t = datetime.fromisoformat('2023-09-11T19:37:41+03:00')
     >>> get_times(t, 55.755833, 37.617222).get(SUNSET).isoformat()
+    '2023-09-08T19:09:43.632146'
+
+    >>> t = datetime.fromisoformat('2023-09-11T19:37:41+00:00')
+    >>> get_times(t, 55.755833, 37.617222).get(SUNSET).isoformat()
+    '2023-09-08T19:09:43.632146'
+
+    >>> t = datetime.fromisoformat('2023-09-11T19:37:41')
+    >>> get_times(t, 55.755833, 37.617222).get(SUNSET).utctimetuple()
     '2023-09-08T19:09:43.632146'
 
     :return: {<name>: <datetime>, ...}
     """
-    dt = datetime(dt.year, dt.month, dt.day, hour=12, tzinfo=dt.tzinfo)
+    if not isinstance(dt, datetime):
+        if not isinstance(dt, date):
+            raise TypeError(dt)
+        dt = datetime(dt.year, dt.month, dt.day, hour=12)
+    ts = dt.timestamp()
 
     lw: float = RAD * -long
     phi: float = RAD * lat
 
     dh: float = _observer_angle(0)
-    d: float = _to_days(dt)
+    d: float = _to_days(ts)
     n: int = _julian_cycle(d, lw)
     ds: float = _approx_transit(0, lw, n)
 
@@ -112,8 +128,8 @@ def get_times(
     j_noon: float = _solar_transit_j(ds, M, L)
 
     result: dict[str, datetime] = {
-        ZENITH: _from_julian(j_noon, dt.tzinfo),
-        NADIR: _from_julian(j_noon - 0.5, dt.tzinfo),
+        ZENITH: _from_julian(j_noon),
+        NADIR: _from_julian(j_noon - 0.5),
     }
     for time in _SUN_TIMES:
         h0: float = (time.angle + dh) * RAD
@@ -122,8 +138,8 @@ def get_times(
             continue
         j_rise: float = j_noon - (j_set - j_noon)
 
-        result[time.rise_name] = _from_julian(j_rise, dt.tzinfo)
-        result[time.set_name] = _from_julian(j_set, dt.tzinfo)
+        result[time.rise_name] = _from_julian(j_rise)
+        result[time.set_name] = _from_julian(j_set)
 
     # not part of the original library:
     if SUNRISE not in result.keys():
@@ -139,16 +155,16 @@ def get_times(
     return result
 
 
-def _to_days(dt: datetime) -> float:
-    return _to_julian(dt) - J2000
+def _to_days(ts: float) -> float:
+    return _to_julian(ts) - J2000
 
 
-def _to_julian(dt: datetime) -> float:
-    return (dt.timestamp() / DAY_SEC) - 0.5 + J1970
+def _to_julian(ts: float) -> float:
+    return (ts / DAY_SEC) - 0.5 + J1970
 
 
-def _from_julian(j: float, tz: tzinfo) -> datetime:
-    return datetime.fromtimestamp((j + 0.5 - J1970) * DAY_SEC, tz)
+def _from_julian(j: float) -> datetime:
+    return datetime.utcfromtimestamp((j + 0.5 - J1970) * DAY_SEC)
 
 
 def _right_ascension(l: float, b: float) -> float:
